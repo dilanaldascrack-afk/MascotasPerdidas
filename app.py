@@ -1,6 +1,5 @@
 import os
-import cloudinary
-import cloudinary.uploader
+import base64
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from config import Config
 from models import db, Pet
@@ -12,29 +11,19 @@ app.config.from_object(Config)
 # Init DB
 db.init_app(app)
 
-# Init Cloudinary
-cloudinary.config(
-    cloud_name=app.config.get("CLOUDINARY_CLOUD_NAME"),
-    api_key=app.config.get("CLOUDINARY_API_KEY"),
-    api_secret=app.config.get("CLOUDINARY_API_SECRET"),
-)
-
-
-def upload_photo(file):
-    """Upload photo to Cloudinary and return (url, public_id)."""
+def process_photo(file):
+    """Convert photo to Base64 string."""
     try:
-        result = cloudinary.uploader.upload(
-            file,
-            folder="mascotas_perdidas",
-            transformation=[
-                {"width": 800, "height": 800, "crop": "limit"},
-                {"quality": "auto:good"},
-            ],
-        )
-        return result.get("secure_url"), result.get("public_id")
+        file_content = file.read()
+        # Determine format based on filename
+        ext = file.filename.rsplit(".", 1)[-1].lower()
+        if ext == 'jpg': ext = 'jpeg'
+        
+        encoded = base64.b64encode(file_content).decode("utf-8")
+        return f"data:image/{ext};base64,{encoded}"
     except Exception as e:
-        print(f"Cloudinary upload error: {e}")
-        return None, None
+        print(f"Error encoding photo: {e}")
+        return None
 
 
 # ────────────────────────────────────────────────
@@ -192,14 +181,13 @@ def report():
             return render_template("report.html", form_data=request.form)
 
         # Upload photo
-        photo_url = None
-        photo_public_id = None
+        photo_data = None
         photo_file = request.files.get("photo")
         if photo_file and photo_file.filename:
             allowed = {"png", "jpg", "jpeg", "gif", "webp"}
             ext = photo_file.filename.rsplit(".", 1)[-1].lower()
             if ext in allowed:
-                photo_url, photo_public_id = upload_photo(photo_file)
+                photo_data = process_photo(photo_file)
             else:
                 flash("Formato de imagen no válido. Usa PNG, JPG, GIF o WEBP.", "error")
                 return render_template("report.html", form_data=request.form)
@@ -225,8 +213,7 @@ def report():
             contact_phone=contact_phone,
             contact_email=contact_email,
             reward=reward,
-            photo_url=photo_url,
-            photo_public_id=photo_public_id,
+            photo_data=photo_data,
         )
         db.session.add(pet)
         db.session.commit()

@@ -18,8 +18,11 @@ class Config:
     # Fix for Render PostgreSQL URL (postgres:// → postgresql://)
     @staticmethod
     def fix_db_url(url):
-        if url and url.startswith("postgres://"):
-            return url.replace("postgres://", "postgresql://", 1)
+        if url:
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql+psycopg://", 1)
+            elif url.startswith("postgresql://"):
+                url = url.replace("postgresql://", "postgresql+psycopg://", 1)
         return url
 
 

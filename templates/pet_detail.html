@@ -20,8 +20,8 @@
     <!-- Photo column -->
     <div class="detail-photo-col">
       <div class="detail-photo-wrap {% if pet.status == 'perdido' %}photo-lost{% else %}photo-found{% endif %}">
-        {% if pet.photo_url %}
-          <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name or pet.species }}" class="detail-photo" id="petPhoto" />
+        {% if pet.photo_data %}
+          <img src="{{ pet.photo_data }}" alt="Foto de {{ pet.name or pet.species }}" class="detail-photo" id="petPhoto" />
         {% else %}
           <div class="detail-no-photo">
             {% if pet.species == 'perro' %}🐶

@@ -37,9 +37,8 @@ class Pet(db.Model):
     contact_email = db.Column(db.String(150), nullable=True)
     reward = db.Column(db.String(100), nullable=True)
 
-    # Photo (Cloudinary URL)
-    photo_url = db.Column(db.String(500), nullable=True)
-    photo_public_id = db.Column(db.String(255), nullable=True)
+    # Photo (Base64 stored directly in DB)
+    photo_data = db.Column(db.Text, nullable=True)
 
     # Metadata
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -62,7 +61,7 @@ class Pet(db.Model):
             "contact_phone": self.contact_phone,
             "contact_email": self.contact_email,
             "reward": self.reward,
-            "photo_url": self.photo_url,
+            "photo_data": self.photo_data,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "is_resolved": self.is_resolved,
         }

@@ -151,8 +151,8 @@
 <article class="pet-card {% if pet.status == 'perdido' %}pet-card-lost{% else %}pet-card-found{% endif %}" id="petCard{{ pet.id }}">
   <a href="{{ url_for('pet_detail', pet_id=pet.id) }}" class="pet-card-link">
     <div class="pet-card-img-wrap">
-      {% if pet.photo_url %}
-        <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name or pet.species }}" class="pet-card-img" loading="lazy" />
+      {% if pet.photo_data %}
+        <img src="{{ pet.photo_data }}" alt="Foto de {{ pet.name or pet.species }}" class="pet-card-img" loading="lazy" />
       {% else %}
         <div class="pet-card-no-img">
           {% if pet.species == 'perro' %}🐶
