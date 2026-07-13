@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Reportar Mascota — PetAlert{% endblock %}
+{% block meta_description %}Reporta una mascota perdida o encontrada en PetAlert. Sube una foto y deja tus datos de contacto para ayudar al reencuentro.{% endblock %}
+
+{% block content %}
+<div class="report-page" id="reportPage">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-content">
+      <h1 class="page-title">📋 Reportar Mascota</h1>
+      <p class="page-subtitle">Completa el formulario para publicar el reporte. Cuanta más información, mejor.</p>
+    </div>
+  </div>
+
+  <div class="report-layout">
+    <form action="{{ url_for('report') }}" method="POST" enctype="multipart/form-data"
+          class="report-form" id="reportForm" novalidate>
+
+      <!-- Status Toggle -->
+      <div class="form-section" id="sectionStatus">
+        <h2 class="form-section-title">¿Qué tipo de reporte es?</h2>
+        <div class="status-toggle-group" id="statusToggleGroup">
+          <label class="status-toggle {% if form_data.get('status','perdido') == 'perdido' %}active{% endif %}" id="toggleLost">
+            <input type="radio" name="status" value="perdido"
+                   {% if form_data.get('status','perdido') == 'perdido' %}checked{% endif %}
+                   onchange="updateStatusUI(this)" />
+            <span class="toggle-icon">🆘</span>
+            <span class="toggle-label">Mascota Perdida</span>
+            <span class="toggle-desc">La mascota se perdió y busco ayuda para encontrarla</span>
+          </label>
+          <label class="status-toggle {% if form_data.get('status') == 'encontrado' %}active{% endif %}" id="toggleFound">
+            <input type="radio" name="status" value="encontrado"
+                   {% if form_data.get('status') == 'encontrado' %}checked{% endif %}
+                   onchange="updateStatusUI(this)" />
+            <span class="toggle-icon">🏠</span>
+            <span class="toggle-label">Mascota Encontrada</span>
+            <span class="toggle-desc">Encontré una mascota y busco a su dueño</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Photo Upload -->
+      <div class="form-section" id="sectionPhoto">
+        <h2 class="form-section-title">📸 Foto de la mascota</h2>
+        <div class="photo-upload-area" id="photoUploadArea">
+          <input type="file" name="photo" id="photoInput" accept="image/*" class="photo-input" />
+          <div class="photo-placeholder" id="photoPlaceholder">
+            <div class="photo-placeholder-icon">📷</div>
+            <p class="photo-placeholder-text">Haz clic o arrastra una foto aquí</p>
+            <p class="photo-placeholder-hint">JPG, PNG, WEBP · Máx. 10 MB · Recomendado: foto clara del animal</p>
+          </div>
+          <div class="photo-preview-wrap hidden" id="photoPreviewWrap">
+            <img src="" alt="Vista previa" class="photo-preview" id="photoPreview" />
+            <button type="button" class="photo-remove" id="photoRemove" onclick="removePhoto()">✕ Eliminar foto</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pet Info -->
+      <div class="form-section" id="sectionPetInfo">
+        <h2 class="form-section-title">🐾 Información de la mascota</h2>
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label class="form-label" for="petName">Nombre (si se conoce)</label>
+            <input type="text" name="name" id="petName" class="form-input"
+                   placeholder="Ej: Max, Luna..." value="{{ form_data.get('name','') }}" />
+          </div>
+
+          <div class="form-group form-group-required">
+            <label class="form-label" for="petSpecies">Especie *</label>
+            <select name="species" id="petSpecies" class="form-select" required>
+              <option value="">Seleccionar especie</option>
+              <option value="perro" {% if form_data.get('species') == 'perro' %}selected{% endif %}>🐶 Perro</option>
+              <option value="gato" {% if form_data.get('species') == 'gato' %}selected{% endif %}>🐱 Gato</option>
+              <option value="ave" {% if form_data.get('species') == 'ave' %}selected{% endif %}>🦜 Ave</option>
+              <option value="otro" {% if form_data.get('species') == 'otro' %}selected{% endif %}>🐾 Otro</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="petBreed">Raza</label>
+            <input type="text" name="breed" id="petBreed" class="form-input"
+                   placeholder="Ej: Labrador, Siamés..." value="{{ form_data.get('breed','') }}" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="petColor">Color / Pelaje</label>
+            <input type="text" name="color" id="petColor" class="form-input"
+                   placeholder="Ej: Negro con manchas blancas" value="{{ form_data.get('color','') }}" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="petSize">Tamaño</label>
+            <select name="size" id="petSize" class="form-select">
+              <option value="">Seleccionar tamaño</option>
+              <option value="pequeño" {% if form_data.get('size') == 'pequeño' %}selected{% endif %}>Pequeño (menos de 10 kg)</option>
+              <option value="mediano" {% if form_data.get('size') == 'mediano' %}selected{% endif %}>Mediano (10–25 kg)</option>
+              <option value="grande" {% if form_data.get('size') == 'grande' %}selected{% endif %}>Grande (más de 25 kg)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="petGender">Género</label>
+            <select name="gender" id="petGender" class="form-select">
+              <option value="">Desconocido</option>
+              <option value="macho" {% if form_data.get('gender') == 'macho' %}selected{% endif %}>♂️ Macho</option>
+              <option value="hembra" {% if form_data.get('gender') == 'hembra' %}selected{% endif %}>♀️ Hembra</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="petAge">Edad estimada</label>
+            <input type="text" name="age_estimate" id="petAge" class="form-input"
+                   placeholder="Ej: 2 años, cachorro..." value="{{ form_data.get('age_estimate','') }}" />
+          </div>
+
+        </div>
+
+        <!-- Checkboxes -->
+        <div class="checkbox-row">
+          <label class="checkbox-label" for="hasCollar">
+            <input type="checkbox" name="has_collar" id="hasCollar" value="1"
+                   {% if form_data.get('has_collar') %}checked{% endif %} />
+            <span class="checkbox-custom"></span>
+            🔖 Tiene collar
+          </label>
+          <label class="checkbox-label" for="hasChip">
+            <input type="checkbox" name="has_chip" id="hasChip" value="1"
+                   {% if form_data.get('has_chip') %}checked{% endif %} />
+            <span class="checkbox-custom"></span>
+            💉 Tiene microchip
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="petDescription">Descripción adicional</label>
+          <textarea name="description" id="petDescription" class="form-textarea" rows="4"
+                    placeholder="Señas particulares, comportamiento, cualquier detalle que ayude a identificarlo...">{{ form_data.get('description','') }}</textarea>
+        </div>
+      </div>
+
+      <!-- Location & Date -->
+      <div class="form-section" id="sectionLocation">
+        <h2 class="form-section-title">📍 Ubicación y Fecha</h2>
+        <div class="form-grid">
+
+          <div class="form-group form-group-required">
+            <label class="form-label" for="petCity">Ciudad *</label>
+            <input type="text" name="city" id="petCity" class="form-input"
+                   placeholder="Ej: Bogotá, Medellín..." required
+                   value="{{ form_data.get('city','') }}" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="petNeighborhood">Barrio / Sector</label>
+            <input type="text" name="neighborhood" id="petNeighborhood" class="form-input"
+                   placeholder="Ej: El Poblado" value="{{ form_data.get('neighborhood','') }}" />
+          </div>
+
+          <div class="form-group form-group-full">
+            <label class="form-label" for="petAddress">Dirección aproximada del último avistamiento</label>
+            <input type="text" name="last_seen_address" id="petAddress" class="form-input"
+                   placeholder="Ej: Calle 50 con Carrera 10, cerca al parque..." value="{{ form_data.get('last_seen_address','') }}" />
+          </div>
+
+          <div class="form-group form-group-required">
+            <label class="form-label" for="petDate">Fecha del último avistamiento *</label>
+            <input type="date" name="last_seen_date" id="petDate" class="form-input"
+                   required value="{{ form_data.get('last_seen_date','') }}" />
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="form-section" id="sectionContact">
+        <h2 class="form-section-title">📞 Tus datos de contacto</h2>
+        <div class="form-grid">
+
+          <div class="form-group form-group-required">
+            <label class="form-label" for="contactName">Tu nombre *</label>
+            <input type="text" name="contact_name" id="contactName" class="form-input"
+                   placeholder="Tu nombre completo" required value="{{ form_data.get('contact_name','') }}" />
+          </div>
+
+          <div class="form-group form-group-required">
+            <label class="form-label" for="contactPhone">Teléfono / WhatsApp *</label>
+            <input type="tel" name="contact_phone" id="contactPhone" class="form-input"
+                   placeholder="+57 300 000 0000" required value="{{ form_data.get('contact_phone','') }}" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="contactEmail">Correo electrónico</label>
+            <input type="email" name="contact_email" id="contactEmail" class="form-input"
+                   placeholder="tu@email.com" value="{{ form_data.get('contact_email','') }}" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="petReward">Recompensa (opcional)</label>
+            <input type="text" name="reward" id="petReward" class="form-input"
+                   placeholder="Ej: $500.000 COP" value="{{ form_data.get('reward','') }}" />
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="form-submit" id="formSubmit">
+        <button type="submit" class="btn btn-primary btn-lg btn-submit" id="btnSubmitReport">
+          <span class="btn-submit-icon">🚀</span>
+          <span class="btn-submit-text">Publicar Reporte</span>
+          <span class="btn-submit-loading hidden">Publicando...</span>
+        </button>
+        <p class="submit-hint">El reporte será visible inmediatamente para toda la comunidad.</p>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

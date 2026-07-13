@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Buscar Mascotas — PetAlert{% endblock %}
+{% block meta_description %}Filtra mascotas perdidas y encontradas por ciudad, especie, color y fecha. PetAlert.{% endblock %}
+
+{% block content %}
+<div class="search-page" id="searchPage">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-content">
+      <h1 class="page-title">🔍 Buscar Mascotas</h1>
+      <p class="page-subtitle">Filtra los reportes para encontrar la mascota que buscas</p>
+    </div>
+  </div>
+
+  <div class="search-layout">
+
+    <!-- Filters Sidebar -->
+    <aside class="filters-sidebar" id="filtersSidebar">
+      <div class="filters-card">
+        <div class="filters-header">
+          <h2>Filtros</h2>
+          <a href="{{ url_for('search') }}" class="filters-clear" id="btnClearFilters">Limpiar</a>
+        </div>
+        <form action="{{ url_for('search') }}" method="GET" id="filtersForm">
+
+          <div class="filter-group">
+            <label class="filter-label" for="filterStatus">Estado</label>
+            <div class="filter-toggle-group">
+              <label class="filter-toggle {% if filters.status == '' %}active{% endif %}">
+                <input type="radio" name="status" value="" {% if filters.status == '' %}checked{% endif %} />
+                Todos
+              </label>
+              <label class="filter-toggle {% if filters.status == 'perdido' %}active{% endif %}">
+                <input type="radio" name="status" value="perdido" {% if filters.status == 'perdido' %}checked{% endif %} />
+                🆘 Perdidos
+              </label>
+              <label class="filter-toggle {% if filters.status == 'encontrado' %}active{% endif %}">
+                <input type="radio" name="status" value="encontrado" {% if filters.status == 'encontrado' %}checked{% endif %} />
+                🏠 Encontrados
+              </label>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="filterSpecies">Especie</label>
+            <select name="species" id="filterSpecies" class="filter-select">
+              <option value="">Todas las especies</option>
+              <option value="perro" {% if filters.species == 'perro' %}selected{% endif %}>🐶 Perro</option>
+              <option value="gato" {% if filters.species == 'gato' %}selected{% endif %}>🐱 Gato</option>
+              <option value="ave" {% if filters.species == 'ave' %}selected{% endif %}>🦜 Ave</option>
+              <option value="otro" {% if filters.species == 'otro' %}selected{% endif %}>🐾 Otro</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="filterCity">Ciudad</label>
+            <input type="text" name="city" id="filterCity" class="filter-input"
+                   placeholder="Buscar ciudad..." value="{{ filters.city }}"
+                   list="citiesList" />
+            <datalist id="citiesList">
+              {% for city in cities %}
+                <option value="{{ city }}">{{ city }}</option>
+              {% endfor %}
+            </datalist>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="filterSize">Tamaño</label>
+            <select name="size" id="filterSize" class="filter-select">
+              <option value="">Todos los tamaños</option>
+              <option value="pequeño" {% if filters.size == 'pequeño' %}selected{% endif %}>Pequeño</option>
+              <option value="mediano" {% if filters.size == 'mediano' %}selected{% endif %}>Mediano</option>
+              <option value="grande" {% if filters.size == 'grande' %}selected{% endif %}>Grande</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="filterColor">Color</label>
+            <input type="text" name="color" id="filterColor" class="filter-input"
+                   placeholder="Ej: negro, blanco..." value="{{ filters.color }}" />
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Fecha visto</label>
+            <input type="date" name="date_from" id="filterDateFrom" class="filter-input"
+                   value="{{ filters.date_from }}" placeholder="Desde" />
+            <input type="date" name="date_to" id="filterDateTo" class="filter-input" style="margin-top:8px;"
+                   value="{{ filters.date_to }}" placeholder="Hasta" />
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full" id="btnApplyFilters">
+            🔍 Aplicar Filtros
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Results Area -->
+    <div class="search-results" id="searchResults">
+
+      <!-- Results Count -->
+      <div class="results-bar">
+        <span class="results-count" id="resultsCount">
+          {% if pets.total == 0 %}
+            Sin resultados
+          {% elif pets.total == 1 %}
+            1 mascota encontrada
+          {% else %}
+            {{ pets.total }} mascotas encontradas
+          {% endif %}
+        </span>
+        <button class="filters-mobile-toggle btn btn-ghost btn-sm" id="btnToggleFilters">
+          ⚙️ Filtros
+        </button>
+      </div>
+
+      <!-- Grid -->
+      {% if pets.items %}
+        <div class="pets-grid" id="petsGrid">
+          {% for pet in pets.items %}
+          <article class="pet-card {% if pet.status == 'perdido' %}pet-card-lost{% else %}pet-card-found{% endif %}" id="petCard{{ pet.id }}">
+            <a href="{{ url_for('pet_detail', pet_id=pet.id) }}" class="pet-card-link">
+              <div class="pet-card-img-wrap">
+                {% if pet.photo_url %}
+                  <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name or pet.species }}" class="pet-card-img" loading="lazy" />
+                {% else %}
+                  <div class="pet-card-no-img">
+                    {% if pet.species == 'perro' %}🐶
+                    {% elif pet.species == 'gato' %}🐱
+                    {% elif pet.species == 'ave' %}🦜
+                    {% else %}🐾{% endif %}
+                  </div>
+                {% endif %}
+                <div class="pet-card-badge {% if pet.status == 'perdido' %}badge-lost{% else %}badge-found{% endif %}">
+                  {% if pet.status == 'perdido' %}🆘 Perdido{% else %}🏠 Encontrado{% endif %}
+                </div>
+              </div>
+              <div class="pet-card-body">
+                <div class="pet-card-species">
+                  {% if pet.species == 'perro' %}🐶{% elif pet.species == 'gato' %}🐱{% elif pet.species == 'ave' %}🦜{% else %}🐾{% endif %}
+                  {{ pet.species | capitalize }}{% if pet.breed %} · {{ pet.breed }}{% endif %}
+                </div>
+                <h3 class="pet-card-name">{{ pet.name or "Sin nombre" }}</h3>
+                <div class="pet-card-meta">
+                  <span class="meta-item">📍 {{ pet.city }}{% if pet.neighborhood %}, {{ pet.neighborhood }}{% endif %}</span>
+                  <span class="meta-item">📅 {{ pet.last_seen_date.strftime('%d/%m/%Y') if pet.last_seen_date else 'N/A' }}</span>
+                </div>
+                {% if pet.color %}<div class="pet-card-color">🎨 {{ pet.color }}</div>{% endif %}
+              </div>
+            </a>
+          </article>
+          {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if pets.pages > 1 %}
+        <nav class="pagination" id="pagination" aria-label="Paginación">
+          {% if pets.has_prev %}
+            <a href="{{ url_for('search', page=pets.prev_num, **filters) }}" class="page-btn" id="btnPrev">← Anterior</a>
+          {% endif %}
+          {% for page_num in pets.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+            {% if page_num %}
+              <a href="{{ url_for('search', page=page_num, **filters) }}"
+                 class="page-btn {% if page_num == pets.page %}page-btn-active{% endif %}"
+                 id="pageBtn{{ page_num }}">{{ page_num }}</a>
+            {% else %}
+              <span class="page-ellipsis">…</span>
+            {% endif %}
+          {% endfor %}
+          {% if pets.has_next %}
+            <a href="{{ url_for('search', page=pets.next_num, **filters) }}" class="page-btn" id="btnNext">Siguiente →</a>
+          {% endif %}
+        </nav>
+        {% endif %}
+
+      {% else %}
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">🔍</div>
+          <h3>No encontramos resultados</h3>
+          <p>Intenta con otros filtros o <a href="{{ url_for('report') }}">reporta una nueva mascota</a>.</p>
+          <a href="{{ url_for('search') }}" class="btn btn-ghost" id="btnClearSearch">Limpiar búsqueda</a>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

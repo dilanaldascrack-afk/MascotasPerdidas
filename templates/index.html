@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}PetAlert — Ayuda a encontrar mascotas perdidas{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero" id="hero">
+  <div class="hero-bg">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">🐾 Plataforma de mascotas perdidas</div>
+    <h1 class="hero-title">
+      Ayuda a reunir<br />
+      <span class="hero-gradient">familias y mascotas</span>
+    </h1>
+    <p class="hero-subtitle">
+      Reporta mascotas perdidas o encontradas con foto, ubicación y datos de contacto.
+      Filtra por ciudad, especie y fecha para encontrar al animal que buscas.
+    </p>
+    <div class="hero-actions">
+      <a href="{{ url_for('report') }}" class="btn btn-primary btn-lg" id="btnReportHero">
+        <span>🆘</span> Reportar Mascota
+      </a>
+      <a href="{{ url_for('search') }}" class="btn btn-ghost btn-lg" id="btnSearchHero">
+        <span>🔍</span> Buscar Mascotas
+      </a>
+    </div>
+    <!-- Quick Stats -->
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num">{{ total_lost }}</span>
+        <span class="hero-stat-lbl">Perdidas</span>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">{{ total_found }}</span>
+        <span class="hero-stat-lbl">Encontradas</span>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">{{ total_resolved }}</span>
+        <span class="hero-stat-lbl">Reunidas ❤️</span>
+      </div>
+    </div>
+  </div>
+  <!-- Quick Search Bar -->
+  <div class="quick-search">
+    <form action="{{ url_for('search') }}" method="GET" class="quick-search-form" id="quickSearchForm">
+      <select name="status" class="qs-select" id="qsStatus">
+        <option value="">Estado</option>
+        <option value="perdido">Perdido</option>
+        <option value="encontrado">Encontrado</option>
+      </select>
+      <select name="species" class="qs-select" id="qsSpecies">
+        <option value="">Especie</option>
+        <option value="perro">🐶 Perro</option>
+        <option value="gato">🐱 Gato</option>
+        <option value="ave">🦜 Ave</option>
+        <option value="otro">🐾 Otro</option>
+      </select>
+      <input type="text" name="city" placeholder="Ciudad..." class="qs-input" id="qsCity" />
+      <button type="submit" class="qs-btn btn btn-primary" id="qsSubmit">Buscar</button>
+    </form>
+  </div>
+</section>
+
+<!-- Lost Pets Section -->
+{% if recent_lost %}
+<section class="pets-section" id="sectionLost">
+  <div class="section-container">
+    <div class="section-header">
+      <div class="section-badge badge-lost">🆘 Perdidas</div>
+      <h2 class="section-title">Mascotas Perdidas Recientes</h2>
+      <a href="{{ url_for('search') }}?status=perdido" class="section-link">Ver todas →</a>
+    </div>
+    <div class="pets-grid" id="gridLost">
+      {% for pet in recent_lost %}
+        {{ pet_card(pet) }}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Found Pets Section -->
+{% if recent_found %}
+<section class="pets-section pets-section-alt" id="sectionFound">
+  <div class="section-container">
+    <div class="section-header">
+      <div class="section-badge badge-found">🏠 Encontradas</div>
+      <h2 class="section-title">Mascotas Encontradas Recientes</h2>
+      <a href="{{ url_for('search') }}?status=encontrado" class="section-link">Ver todas →</a>
+    </div>
+    <div class="pets-grid" id="gridFound">
+      {% for pet in recent_found %}
+        {{ pet_card(pet) }}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Empty state -->
+{% if not recent_lost and not recent_found %}
+<section class="empty-hero-section">
+  <div class="empty-state">
+    <div class="empty-icon">🐾</div>
+    <h2>¡Sé el primero en reportar!</h2>
+    <p>Aún no hay mascotas reportadas. Si conoces una mascota perdida o encontrada, ¡publícalo!</p>
+    <a href="{{ url_for('report') }}" class="btn btn-primary btn-lg" id="btnFirstReport">Hacer primer reporte</a>
+  </div>
+</section>
+{% endif %}
+
+<!-- How it works -->
+<section class="how-it-works" id="howItWorks">
+  <div class="section-container">
+    <div class="section-header center">
+      <h2 class="section-title">¿Cómo funciona?</h2>
+      <p class="section-subtitle">Tres pasos simples para ayudar a tu mascota</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card" id="step1">
+        <div class="step-icon">📸</div>
+        <div class="step-num">01</div>
+        <h3>Reporta con foto</h3>
+        <p>Sube una foto clara de la mascota, indica dónde y cuándo fue vista por última vez.</p>
+      </div>
+      <div class="step-card" id="step2">
+        <div class="step-icon">🔍</div>
+        <div class="step-num">02</div>
+        <h3>Filtra y comparte</h3>
+        <p>Busca por ciudad, especie, color y fecha. Comparte el reporte en redes sociales.</p>
+      </div>
+      <div class="step-card" id="step3">
+        <div class="step-icon">❤️</div>
+        <div class="step-num">03</div>
+        <h3>¡Reencuentro!</h3>
+        <p>Contacta directamente al reportante y marca el caso como resuelto cuando se encuentren.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Macro for pet card -->
+{% macro pet_card(pet) %}
+<article class="pet-card {% if pet.status == 'perdido' %}pet-card-lost{% else %}pet-card-found{% endif %}" id="petCard{{ pet.id }}">
+  <a href="{{ url_for('pet_detail', pet_id=pet.id) }}" class="pet-card-link">
+    <div class="pet-card-img-wrap">
+      {% if pet.photo_url %}
+        <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name or pet.species }}" class="pet-card-img" loading="lazy" />
+      {% else %}
+        <div class="pet-card-no-img">
+          {% if pet.species == 'perro' %}🐶
+          {% elif pet.species == 'gato' %}🐱
+          {% elif pet.species == 'ave' %}🦜
+          {% else %}🐾{% endif %}
+        </div>
+      {% endif %}
+      <div class="pet-card-badge {% if pet.status == 'perdido' %}badge-lost{% else %}badge-found{% endif %}">
+        {% if pet.status == 'perdido' %}🆘 Perdido{% else %}🏠 Encontrado{% endif %}
+      </div>
+    </div>
+    <div class="pet-card-body">
+      <div class="pet-card-species">
+        {% if pet.species == 'perro' %}🐶{% elif pet.species == 'gato' %}🐱{% elif pet.species == 'ave' %}🦜{% else %}🐾{% endif %}
+        {{ pet.species | capitalize }}{% if pet.breed %} · {{ pet.breed }}{% endif %}
+      </div>
+      <h3 class="pet-card-name">{{ pet.name or "Sin nombre" }}</h3>
+      <div class="pet-card-meta">
+        <span class="meta-item">📍 {{ pet.city }}{% if pet.neighborhood %}, {{ pet.neighborhood }}{% endif %}</span>
+        <span class="meta-item">📅 {{ pet.last_seen_date.strftime('%d/%m/%Y') if pet.last_seen_date else 'N/A' }}</span>
+      </div>
+      {% if pet.color %}<div class="pet-card-color"><span class="color-dot" style="background:{{ pet.color | lower | replace(' ', '') if pet.color in ['negro','blanco','gris','marrón','naranja','amarillo','rojo'] else '#888' }}"></span>{{ pet.color }}</div>{% endif %}
+    </div>
+  </a>
+</article>
+{% endmacro %}
+
+{% endblock %}
