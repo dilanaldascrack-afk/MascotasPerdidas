@@ -150,20 +150,20 @@
           <div class="form-group form-group-required">
             <label class="form-label" for="petCity">Ciudad *</label>
             <input type="text" name="city" id="petCity" class="form-input"
-                   placeholder="Ej: Bogotá, Medellín..." required
+                   placeholder="Ej: Ibarra, Quito..." required
                    value="{{ form_data.get('city','') }}" />
           </div>
 
           <div class="form-group">
             <label class="form-label" for="petNeighborhood">Barrio / Sector</label>
             <input type="text" name="neighborhood" id="petNeighborhood" class="form-input"
-                   placeholder="Ej: El Poblado" value="{{ form_data.get('neighborhood','') }}" />
+                   placeholder="Ej: Alpachaca, Los Ceibos..." value="{{ form_data.get('neighborhood','') }}" />
           </div>
 
           <div class="form-group form-group-full">
             <label class="form-label" for="petAddress">Dirección aproximada del último avistamiento</label>
             <input type="text" name="last_seen_address" id="petAddress" class="form-input"
-                   placeholder="Ej: Calle 50 con Carrera 10, cerca al parque..." value="{{ form_data.get('last_seen_address','') }}" />
+                   placeholder="Ej: Av. Mariano Acosta y Pérez de Velasco..." value="{{ form_data.get('last_seen_address','') }}" />
           </div>
 
           <div class="form-group form-group-required">
@@ -189,7 +189,7 @@
           <div class="form-group form-group-required">
             <label class="form-label" for="contactPhone">Teléfono / WhatsApp *</label>
             <input type="tel" name="contact_phone" id="contactPhone" class="form-input"
-                   placeholder="+57 300 000 0000" required value="{{ form_data.get('contact_phone','') }}" />
+                   placeholder="+593 90 000 0000" required value="{{ form_data.get('contact_phone','') }}" />
           </div>
 
           <div class="form-group">
@@ -201,7 +201,7 @@
           <div class="form-group">
             <label class="form-label" for="petReward">Recompensa (opcional)</label>
             <input type="text" name="reward" id="petReward" class="form-input"
-                   placeholder="Ej: $500.000 COP" value="{{ form_data.get('reward','') }}" />
+                   placeholder="Ej: $50 USD" value="{{ form_data.get('reward','') }}" />
           </div>
 
         </div>
